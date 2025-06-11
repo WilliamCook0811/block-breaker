@@ -11,6 +11,7 @@ SQUARE_SIZE = 60
 MARGIN = 2
 WINDOW_SIZE = GRID_SIZE * SQUARE_SIZE + (GRID_SIZE + 1) * MARGIN
 GOOD = True
+
 # Colors
 BG_COLOR = (30, 30, 30)
 SQUARE_COLOR = (70, 130, 180)
@@ -24,7 +25,7 @@ grid = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
 # Initialize score
 score = 0
-font = pygame.font.SysFont('Arial', 30)  # Choose a font and size
+font = pygame.font.SysFont('Arial', 30)
 
 class Block:
     def __init__(self, shape, color=(255, 215, 0), x=0, y=0):
@@ -57,7 +58,6 @@ class Block:
         start_col = max(0, min((self.x - margin) // (square_size + margin), grid_size - self.cols))
         start_row = max(0, min((self.y - margin) // (square_size + margin), grid_size - self.rows))
 
-
         for r in range(self.rows):
             for c in range(self.cols):
                 if self.shape[r][c]:
@@ -68,11 +68,10 @@ class Block:
                     if grid[row][col] != 0:
                         return False
         return True
-    
+
     def snap_to_grid(self, square_size, margin):
         self.x = round((self.x - MARGIN) / (square_size + margin)) * (square_size + margin) + MARGIN
         self.y = round((self.y - MARGIN) / (square_size + margin)) * (square_size + margin) + MARGIN
-        
 
     def place_on_grid(self, grid, grid_size, square_size, margin):
         start_col = (self.x - MARGIN) // (square_size + margin)
@@ -82,12 +81,6 @@ class Block:
             for c in range(self.cols):
                 if self.shape[r][c]:
                     grid[start_row + r][start_col + c] = 1
-
-        #DEBUGGING
-        for row in grid:
-            print(row)
-        print(" ")
-        print(" ")
 
 def chk_for_complete(grid):
     global score
@@ -123,7 +116,6 @@ def can_block_fit_anywhere(grid, block_shape):
 
     for start_row in range(grid_size - block_rows + 1):
         for start_col in range(grid_size - block_cols + 1):
-            # Check if block fits at (start_row, start_col)
             fits = True
             for r in range(block_rows):
                 for c in range(block_cols):
@@ -133,68 +125,139 @@ def can_block_fit_anywhere(grid, block_shape):
                 if not fits:
                     break
             if fits:
-                return True  # Found at least one spot
-    return False  # No spot found
+                return True
+    return False
+
+def spawn_blocks(grid, count=3):
+    new_blocks = []
+    attempts = 0
+    while len(new_blocks) < count and attempts < 100:
+        shape = block_shapes[random.randint(0, SHAPE_COUNT - 1)]
+        if can_block_fit_anywhere(grid, shape):
+            color = block_colors[len(new_blocks) % len(block_colors)]
+            x = MARGIN + len(new_blocks) * 150
+            y = WINDOW_SIZE + 40
+            new_blocks.append(Block(shape, color, x, y))
+        attempts += 1
+    return new_blocks
+
 
 # Create a 1x3 block and draw it below the grid
 block_shapes = [
-    # 1x3 line
-    [[1, 1, 1]],
-    # 3x1 vertical line
-    [[1], [1], [1]],
-    # 2x2 square
-    [[1, 1],
+    # Basic shapes (as before)
+    [[1, 1, 1]],                 # 1x3 horizontal line
+    [[1], [1], [1]],             # 3x1 vertical line
+    [[1, 1],                     # 2x2 square
      [1, 1]],
-    # L-shape
-    [[1, 0],
+    [[1, 0],                     # L-shape
      [1, 0],
      [1, 1]],
-    # Reverse L-shape
-    [[0, 1],
+    [[0, 1],                     # Reverse L-shape
      [0, 1],
      [1, 1]],
-    # T-shape
-    [[1, 1, 1],
+    [[1, 1, 1],                  # T-shape
      [0, 1, 0]],
-    # S-shape
-    [[0, 1, 1],
+    [[0, 1, 1],                  # S-shape
      [1, 1, 0]],
-    # Z-shape
-    [[1, 1, 0],
+    [[1, 1, 0],                  # Z-shape
      [0, 1, 1]],
-    # 1x1 block
-    [[1]],
-    # 2x1 block
-    [[1, 1]],
-    # 1x2 block
-    [[1], [1]],
-    # 3x2 rectangle
-    [[1, 1],
+    [[1]],                       # 1x1 block
+    [[1, 1]],                    # 2x1 horizontal
+    [[1], [1]],                  # 1x2 vertical
+    [[1, 1],                     # 3x2 vertical rectangle
      [1, 1],
      [1, 1]],
-    # 2x3 rectangle
-    [[1, 1, 1],
+    [[1, 1, 1],                  # 2x3 horizontal rectangle
      [1, 1, 1]],
-    # U-shape
-    [[1, 0, 1],
+    [[1, 0, 1],                  # U-shape
      [1, 1, 1]],
-    # Plus shape
+    [[0, 1, 0],                  # Plus shape
+     [1, 1, 1],
+     [0, 1, 0]],
+    [[1, 0, 0],                  # Big L-shape
+     [1, 0, 0],
+     [1, 1, 1]],
+    [[0, 0, 1],                  # Big reverse L-shape
+     [0, 0, 1],
+     [1, 1, 1]],
+    [[1, 1, 1, 1]],              # 4x1 horizontal line
+    [[1], [1], [1], [1]],        # 1x4 vertical line
+
+    # Obscure / unusual shapes:
+    
+    # Stair-step shape (3 steps)
+    [[1, 0, 0],
+     [1, 1, 0],
+     [1, 1, 1]],
+
+    # Cross shape (5 blocks in a cross)
     [[0, 1, 0],
      [1, 1, 1],
      [0, 1, 0]],
-    # Big L
+
+    # L with a tail shape
+    [[1, 0],
+     [1, 1],
+     [0, 1]],
+
+    # Small zigzag shape
+    [[1, 0],
+     [1, 1],
+     [0, 1]],
+
+    # Fat T shape
+    [[1, 1, 1],
+     [0, 1, 0],
+     [0, 1, 0]],
+
+    # Wide Z shape
+    [[1, 1, 0, 0],
+     [0, 1, 1, 1]],
+
+    # Block with hole in middle (ring-like)
+    [[1, 1, 1],
+     [1, 0, 1],
+     [1, 1, 1]],
+
+    # Narrow step shape
+    [[1, 0],
+     [1, 1],
+     [0, 1],
+     [0, 1]],
+
+    # 3x3 solid block
+    [[1, 1, 1],
+     [1, 1, 1],
+     [1, 1, 1]],
+
+    # L with corner
     [[1, 0, 0],
-     [1, 0, 0],
+     [1, 1, 0],
+     [0, 1, 1]],
+
+    # Fat S shape
+    [[0, 1, 1, 0],
+     [1, 1, 1, 1]],
+
+    # Small plus with corner block
+    [[0, 1, 0],
+     [1, 1, 1],
+     [0, 1, 1]],
+
+    # Small pyramid
+    [[0, 1, 0],
      [1, 1, 1]],
-    # Big reverse L
+
+    # Mini Tetris J
+    [[1, 0, 0],
+     [1, 1, 1]],
+
+    # Mini Tetris reverse J
     [[0, 0, 1],
-     [0, 0, 1],
      [1, 1, 1]],
-    # 4x1 line
-    [[1, 1, 1, 1]],
-    # 1x4 line
-    [[1], [1], [1], [1]],
+
 ]
+
 SHAPE_COUNT = len(block_shapes)
 
 # Assign a color for each block 
@@ -221,15 +284,14 @@ block_colors = [
     (255, 20, 147),   # deep pink
 ]
 
-# Create a list of Block instances
+# Create initial 3 blocks
 currentblocks = []
 for i in range(3):
     shape = block_shapes[random.randint(0, SHAPE_COUNT - 1)]
     color = block_colors[i % len(block_colors)]
-    x = MARGIN + i * 150  # spacing between blocks
+    x = MARGIN + i * 150
     y = WINDOW_SIZE + 40
     currentblocks.append(Block(shape, color, x, y))
-
 
 # Main loop
 active_block = None
@@ -237,15 +299,15 @@ running = True
 
 while running:
     screen.fill(BG_COLOR)
-    
-    # Draw grid
+
+    # Draw grid background squares
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
             x = MARGIN + col * (SQUARE_SIZE + MARGIN)
             y = MARGIN + row * (SQUARE_SIZE + MARGIN)
             pygame.draw.rect(screen, SQUARE_COLOR, (x, y, SQUARE_SIZE, SQUARE_SIZE))
-    
-    # Draw placed blocks based on grid state
+
+    # Draw placed blocks on grid
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
             if grid[row][col]:
@@ -253,18 +315,14 @@ while running:
                 y = MARGIN + row * (SQUARE_SIZE + MARGIN)
                 pygame.draw.rect(screen, (200, 200, 200), (x, y, SQUARE_SIZE, SQUARE_SIZE))
 
-    # Draw movable blocks
+    # Draw draggable blocks
     for block in currentblocks:
         block.draw(screen, SQUARE_SIZE, MARGIN)
 
-    # Spawn new blocks only when all are placed
+    # If all blocks placed, spawn new ones
     if len(currentblocks) == 0:
-        for i in range(3):  # Spawn 3 new blocks
-            shape = block_shapes[random.randint(0, SHAPE_COUNT - 1)]
-            color = block_colors[i % len(block_colors)]
-            x = MARGIN + i * 150  # spacing between blocks
-            y = WINDOW_SIZE + 40
-            currentblocks.append(Block(shape, color, x, y))
+        currentblocks.extend(spawn_blocks(grid, 3))
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -277,10 +335,8 @@ while running:
                     mouse_x, mouse_y = event.pos
                     offset_x = block.x - mouse_x
                     offset_y = block.y - mouse_y
-                    # Save original position to revert if placement fails
                     block.orig_x = block.x
                     block.orig_y = block.y
-
 
         elif event.type == pygame.MOUSEMOTION and active_block is not None:
             mouse_x, mouse_y = event.pos
@@ -296,33 +352,27 @@ while running:
                     score += sum(sum(row) for row in block.shape)
                     currentblocks.pop(active_block)
                     chk_for_complete(grid)
-                    
-                    # Only check for game over after successful placement
-                    if len(currentblocks) > 0:
-                        all_cant_fit = True
-                        for block in currentblocks:
-                            if can_block_fit_anywhere(grid, block.shape):
-                                all_cant_fit = False
+
+                    # Check game over: no current blocks AND no new block can fit anywhere
+                    if len(currentblocks) == 0:
+                        game_over = True
+                        for shape in block_shapes:
+                            if can_block_fit_anywhere(grid, shape):
+                                game_over = False
                                 break
-                        
-                        if all_cant_fit:
-                            BG_COLOR = (200, 0, 0)
-                            game_over_text = font.render('Game Over!', True, (255, 255, 255))
-                            game_over_rect = game_over_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE + 150))
-                            screen.blit(game_over_text, game_over_rect)
-                            pygame.display.flip()
-                            pygame.time.wait(5000)
+                        if game_over:
+                            print("Game Over!")
                             running = False
                 else:
-                    # Revert block to original position
+                    # Revert block position if placement fails
                     block.x = block.orig_x
                     block.y = block.orig_y
-            active_block = None
+                active_block = None
 
-    # Draw score at the bottom
-    score_text = font.render(f'Score: {score}', True, (255, 255, 255))
-    score_rect = score_text.get_rect(center=(WINDOW_SIZE//2, WINDOW_SIZE + 280))  # Moved further down
-    screen.blit(score_text, score_rect)
+    # Display score
+    score_surf = font.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(score_surf, (10, WINDOW_SIZE + 10))
+
     pygame.display.flip()
 
 pygame.quit()
