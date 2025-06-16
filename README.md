@@ -18,3 +18,5 @@
 
 - **Python 3**
 - **Pygame** for rendering and input handling
+
+![](https://github.com/WilliamCook0811/block-breaker/blob/main/blockBreaker.gif)
