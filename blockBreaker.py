@@ -142,48 +142,46 @@ def spawn_blocks(grid, count=3):
     return new_blocks
 
 
-# Create a 1x3 block and draw it below the grid
 block_shapes = [
-    # Basic shapes (as before)
-    [[1, 1, 1]],                 # 1x3 horizontal line
-    [[1], [1], [1]],             # 3x1 vertical line
-    [[1, 1],                     # 2x2 square
+    [[1, 1, 1]],                 
+    [[1], [1], [1]],             
+    [[1, 1],                   
      [1, 1]],
-    [[1, 0],                     # L-shape
+    [[1, 0],              
      [1, 0],
      [1, 1]],
-    [[0, 1],                     # Reverse L-shape
+    [[0, 1],               
      [0, 1],
      [1, 1]],
-    [[1, 1, 1],                  # T-shape
+    [[1, 1, 1],       
      [0, 1, 0]],
-    [[0, 1, 1],                  # S-shape
+    [[0, 1, 1],             
      [1, 1, 0]],
-    [[1, 1, 0],                  # Z-shape
+    [[1, 1, 0],           
      [0, 1, 1]],
-    [[1]],                       # 1x1 block
-    [[1, 1]],                    # 2x1 horizontal
-    [[1], [1]],                  # 1x2 vertical
-    [[1, 1],                     # 3x2 vertical rectangle
+    [[1]],                       
+    [[1, 1]],                    
+    [[1], [1]],                  
+    [[1, 1],                     
      [1, 1],
      [1, 1]],
-    [[1, 1, 1],                  # 2x3 horizontal rectangle
+    [[1, 1, 1],                  
      [1, 1, 1]],
-    [[1, 0, 1],                  # U-shape
+    [[1, 0, 1],                  
      [1, 1, 1]],
-    [[0, 1, 0],                  # Plus shape
+    [[0, 1, 0],                  
      [1, 1, 1],
      [0, 1, 0]],
-    [[1, 0, 0],                  # Big L-shape
+    [[1, 0, 0],                 
      [1, 0, 0],
      [1, 1, 1]],
-    [[0, 0, 1],                  # Big reverse L-shape
+    [[0, 0, 1],                 
      [0, 0, 1],
      [1, 1, 1]],
-    [[1, 1, 1, 1]],              # 4x1 horizontal line
-    [[1], [1], [1], [1]],        # 1x4 vertical line
+    [[1, 1, 1, 1]],              
+    [[1], [1], [1], [1]],        
 
-    # Obscure / unusual shapes:
+    # Obscure shapes:
     
     # Stair-step shape (3 steps)
     [[1, 0, 0],
@@ -213,11 +211,6 @@ block_shapes = [
     # Wide Z shape
     [[1, 1, 0, 0],
      [0, 1, 1, 1]],
-
-    # Block with hole in middle (ring-like)
-    [[1, 1, 1],
-     [1, 0, 1],
-     [1, 1, 1]],
 
     # Narrow step shape
     [[1, 0],
