@@ -18,7 +18,7 @@ SQUARE_COLOR = (70, 130, 180)
 
 # Set up display
 screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE + 300))
-pygame.display.set_caption("8x8 Grid")
+pygame.display.set_caption("Block Breaker")
 
 # Initialize grid
 grid = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
